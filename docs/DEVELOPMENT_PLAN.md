@@ -30,38 +30,36 @@ Cloud synchronization and public shared map are **future** goals.
 | Component                    | Status      | Notes                                      |
 |-----------------------------|-------------|--------------------------------------------|
 | Project structure           | Done        | Standard Android + Bottom Navigation       |
-| Yandex MapKit integration   | Done        | API key hardcoded in MainActivity          |
-| Location detection          | Partially   | Works, but permission handling is weak     |
-| Map tab (Home)              | Basic       | Full-screen map + location button          |
+| Yandex MapKit integration   | Done        | API key now via BuildConfig                |
+| Location detection          | Improved    | Activity Result API + single marker        |
+| Map tab (Home)              | Improved    | ViewBinding fixed, cleaner code            |
 | Database tab                | Empty       | Only template text                         |
 | Analysis tab                | Empty       | Only template text                         |
 | Noise measurement           | Missing     | —                                          |
 | Local storage (Room)        | Missing     | —                                          |
-| Markers on map              | Missing     | —                                          |
+| Markers on map              | Partial     | Only temporary user location marker        |
 | Proper architecture (MVVM)  | Weak        | Almost no ViewModels used properly         |
 
-### Known technical debt
-1. Double layout inflation in `HomeFragment.onCreateView`
-2. Hardcoded Yandex API key
-3. No proper permission result handling
-4. Package name still `com.example.noisedet2`
-5. No `RECORD_AUDIO` permission yet
-6. Markers accumulate on every location click
+### Known technical debt (remaining)
+1. Package name still `com.example.noisedet2` (can be changed later)
+2. No real noise measurement yet
+3. No Room database yet
+4. Location button UI is still basic
 
 ---
 
 ## 3. Step-by-step Development Plan
 
-### Phase 0 — Foundation & Cleanup (Priority: Critical)
+### Phase 0 — Foundation & Cleanup (Priority: Critical) ✅ DONE
 **Goal:** Make the existing code clean and ready for real features.
 
-1. Fix `HomeFragment` (remove double inflation, use ViewBinding correctly)
-2. Move Yandex API key out of source code (`local.properties` + BuildConfig)
-3. Implement modern permission handling (Activity Result API) for Location + future Audio
-4. Add `RECORD_AUDIO` permission to Manifest
-5. Change applicationId / namespace from `com.example.noisedet2` to something proper (e.g. `com.noisedet.app` or keep for now)
-6. Clean up unused code and comments
-7. Add basic error handling for MapKit lifecycle
+1. [x] Fix `HomeFragment` (remove double inflation, use ViewBinding correctly)
+2. [x] Move Yandex API key out of source code (`local.properties` + BuildConfig)
+3. [x] Implement modern permission handling (Activity Result API) for Location
+4. [x] Add `RECORD_AUDIO` permission to Manifest
+5. [ ] Change applicationId / namespace from `com.example.noisedet2` (deferred)
+6. [x] Clean up unused code and comments
+7. [x] Improve MapView lifecycle safety + single location marker
 
 **Definition of Done:** App launches cleanly, location works reliably, no critical code smells.
 
@@ -194,7 +192,7 @@ When starting work on this project, do the following in order:
 1. Read this file completely
 2. Read `README.md`
 3. Inspect current `HomeFragment.kt` and `MainActivity.kt`
-4. Start with **Phase 0** (cleanup) unless explicitly told otherwise
+4. **Next priority: Phase 1** (Noise Measurement Core)
 5. After each phase — update this document (mark completed items)
 
 ---
@@ -205,8 +203,14 @@ When starting work on this project, do the following in order:
 - Do not introduce cloud features until Phase 7
 - Keep local-first philosophy
 - When adding dependencies — update both `libs.versions.toml` and this plan if needed
-- Yandex MapKit key must never be committed in plain text in the future
+- Yandex MapKit key must never be committed in plain text (use `local.properties`)
 - Always handle runtime permissions properly
+
+### How to set Yandex MapKit API key
+Add to your local (gitignored) `local.properties`:
+```
+YANDEX_MAPKIT_API_KEY=your_real_key_here
+```
 
 ---
 

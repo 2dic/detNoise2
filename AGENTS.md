@@ -14,10 +14,17 @@ This file exists so that any AI agent (Cursor, Claude, Grok, Devin, etc.) can qu
 Android app for measuring and mapping urban noise. Currently local-only storage. Future goal — crowdsourced public noise map + quiet route planning.
 
 ## Current priority
-Execute **Phase 0** and **Phase 1** from `docs/DEVELOPMENT_PLAN.md`.
+**Phase 0 is completed.**  
+Next: execute **Phase 1** (Noise Measurement Core) from `docs/DEVELOPMENT_PLAN.md`.
 
 ## Important constraints
 - Storage is local for now (Room planned)
 - Do not implement cloud/backend yet
-- Yandex MapKit is already integrated
+- Yandex MapKit is already integrated (API key via BuildConfig + local.properties)
 - Keep changes focused and incremental
+
+## Yandex MapKit API key
+Put your key in `local.properties` (gitignored):
+```
+YANDEX_MAPKIT_API_KEY=your_key_here
+```
