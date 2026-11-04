@@ -16,7 +16,7 @@ Android app for measuring and mapping urban noise. Currently local-only storage.
 **Multi-module:**
 ```
 :app
-:core:common
+:core:common          ← NoiseMeter lives here
 :core:ui
 :core:data
 :feature:map
@@ -28,18 +28,16 @@ Android app for measuring and mapping urban noise. Currently local-only storage.
 
 ## Current priority
 
-**Phase 0 + 0.5 completed.**  
-Next: **Phase 1 — Noise Measurement Core**
+**Phase 1 completed** (Noise measurement works).  
+**Next: Phase 2 — Local Storage (Room)**
 
 ## Important constraints
 - Storage is local for now
 - Do not implement cloud/backend yet
-- New UI must be written in Jetpack Compose
+- New UI should prefer Jetpack Compose
 - Put new feature code into the corresponding `feature:*` module
 - Yandex MapKit API key lives in `local.properties` only
 
-## Yandex MapKit API key
-```
-YANDEX_MAPKIT_API_KEY=your_key_here
-```
-(in local.properties)
+## Key classes
+- `core/common/.../noise/NoiseMeter.kt` — measures dB from microphone
+- `ui/home/HomeFragment.kt` — current Map screen (still View-based, will migrate)
