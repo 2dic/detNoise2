@@ -4,8 +4,8 @@
 > Any AI agent or developer working on this repository **must read this file first**.
 
 **Last updated:** 2026-11-04  
-**Project stage:** Phase 1 complete — Noise measurement working  
-**Storage model (current):** Fully local  
+**Project stage:** Phase 2 complete — Local storage working  
+**Storage model (current):** Fully local (Room)  
 **Target:** Crowdsourced urban noise mapping app
 
 ---
@@ -65,7 +65,8 @@ Cloud synchronization and public shared map are **future** goals.
 | Location                    | Working         | Activity Result API                        |
 | Noise measurement (dB)      | **Working**     | NoiseMeter + UI on Map tab                 |
 | Live dB + category colors   | Working         | Green / Yellow / Orange / Red              |
-| Room / local storage        | Missing         | Phase 2                                    |
+| Room / local storage        | **Working**     | Entity + Dao + Repository + Hilt           |
+| Save after measurement      | **Working**     | dB + lat/lng + timestamp                   |
 | Markers for measurements    | Missing         | Phase 3                                    |
 | History / Analysis tabs     | Empty           | Phase 4 / 5                                |
 
@@ -83,14 +84,15 @@ Cloud synchronization and public shared map are **future** goals.
 - [x] Microphone permission handling
 - [x] Color-coded noise categories (Quiet / Moderate / Loud / Very loud)
 
-### Phase 2 — Local Storage (Room)  ← NEXT
-1. Create `NoiseMeasurement` entity in `core:data`
-2. Dao + Database + Repository
-3. Hilt modules
-4. Save measurement (dB + lat/lng + timestamp) after successful capture
-5. Load measurements for later display on map
+### Phase 2 — Local Storage (Room) ✅ DONE
+- [x] `NoiseMeasurementEntity` in `core:data`
+- [x] `NoiseMeasurementDao` + `AppDatabase`
+- [x] `NoiseRepository`
+- [x] Hilt `DatabaseModule`
+- [x] `@HiltAndroidApp` + `@AndroidEntryPoint`
+- [x] Save measurement (dB + lat/lng + timestamp) after successful capture
 
-### Phase 3 — Map Visualization
+### Phase 3 — Map Visualization  ← NEXT
 1. Show saved measurements as color-coded placemarks
 2. Marker click → show dB + time
 3. Migrate Map screen toward Compose
@@ -105,7 +107,7 @@ Cloud synchronization and public shared map are **future** goals.
 ## 5. Immediate Next Actions (for any agent)
 
 1. Read this file + `AGENTS.md` + `README.md`
-2. **Next priority: Phase 2 — Local Storage (Room)**
+2. **Next priority: Phase 3 — Map Visualization**
 3. New code should go into the correct module (`core:data`, `feature:*`)
 4. Prefer Compose for new UI
 5. Update this document after finishing a phase
