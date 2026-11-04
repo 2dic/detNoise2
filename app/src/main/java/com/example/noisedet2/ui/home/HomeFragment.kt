@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.noisedet2.R
 import com.example.noisedet2.core.common.noise.NoiseLevel
 import com.example.noisedet2.core.common.noise.NoiseMeter
+import com.example.noisedet2.core.data.repository.NoiseRepository
 import com.example.noisedet2.databinding.FragmentHomeBinding
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
@@ -24,17 +25,24 @@ import com.yandex.mapkit.location.LocationStatus
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.runtime.image.ImageProvider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import java.util.Locale
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
+    @Inject
+    lateinit var noiseRepository: NoiseRepository
+
     private var userLocationPlacemark: PlacemarkMapObject? = null
+    private var lastKnownLocation: Point? = null
     private val noiseMeter = NoiseMeter()
     private var measurementJob: Job? = null
     private var isMeasuring = false
@@ -125,6 +133,7 @@ class HomeFragment : Fragment() {
             override fun onLocationStatusUpdated(status: LocationStatus) = Unit
 
             override fun onLocationUpdated(location: Location) {
+                lastKnownLocation = location.position
                 showUserLocation(location.position)
             }
         })
@@ -164,6 +173,11 @@ class HomeFragment : Fragment() {
     private fun startNoiseMeasurement() {
         if (isMeasuring) return
 
+        // Prefer fresh location; if none — try to get it now
+        if (lastKnownLocation == null) {
+            requestCurrentLocation()
+        }
+
         isMeasuring = true
         binding.measureBtn.text = "Stop"
         binding.noiseStatus.text = "Measuring…"
@@ -174,10 +188,10 @@ class HomeFragment : Fragment() {
             try {
                 noiseMeter.measure()
                     .onCompletion {
-                        // Calculate average when stopped or finished
                         if (samples.isNotEmpty()) {
                             val avg = samples.average().toFloat()
                             showFinalResult(avg)
+                            saveMeasurement(avg)
                         }
                     }
                     .collect { db ->
@@ -218,6 +232,39 @@ class HomeFragment : Fragment() {
         binding.noiseStatus.text = "Result: ${categoryLabel(NoiseMeter.levelCategory(avgDb))}"
         applyNoiseColor(avgDb)
         resetMeasurementUi()
+    }
+
+    private fun saveMeasurement(dbLevel: Float) {
+        val location = lastKnownLocation
+        if (location == null) {
+            Toast.makeText(
+                requireContext(),
+                "Measurement not saved — location unknown",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                noiseRepository.save(
+                    latitude = location.latitude,
+                    longitude = location.longitude,
+                    dbLevel = dbLevel
+                )
+                Toast.makeText(
+                    requireContext(),
+                    "Saved: ${String.format(Locale.US, "%.1f", dbLevel)} dB",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Failed to save measurement",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     private fun resetMeasurementUi() {
