@@ -4,7 +4,7 @@
 > Any AI agent or developer working on this repository **must read this file first**.
 
 **Last updated:** 2026-11-04  
-**Project stage:** Phase 2 complete — Local storage working  
+**Project stage:** Phase 4 complete — Map markers & measurement history working  
 **Storage model (current):** Fully local (Room)  
 **Target:** Crowdsourced urban noise mapping app
 
@@ -67,8 +67,9 @@ Cloud synchronization and public shared map are **future** goals.
 | Live dB + category colors   | Working         | Green / Yellow / Orange / Red              |
 | Room / local storage        | **Working**     | Entity + Dao + Repository + Hilt           |
 | Save after measurement      | **Working**     | dB + lat/lng + timestamp                   |
-| Markers for measurements    | Missing         | Phase 3                                    |
-| History / Analysis tabs     | Empty           | Phase 4 / 5                                |
+| Markers for measurements    | **Working**     | Color-coded, selectable (Phase 3)          |
+| Map screen                  | **Compose**     | Yandex MapKit via AndroidView              |
+| History / Analysis tabs     | History works   | History list + delete; Analysis Phase 5    |
 
 ---
 
@@ -92,13 +93,25 @@ Cloud synchronization and public shared map are **future** goals.
 - [x] `@HiltAndroidApp` + `@AndroidEntryPoint`
 - [x] Save measurement (dB + lat/lng + timestamp) after successful capture
 
-### Phase 3 — Map Visualization  ← NEXT
-1. Show saved measurements as color-coded placemarks
-2. Marker click → show dB + time
-3. Migrate Map screen toward Compose
+### Phase 3 — Map Visualization ✅ DONE
+- [x] Saved measurements shown as color-coded placemarks
+- [x] Marker click → dB value, category and time
+- [x] Map screen migrated to Jetpack Compose
+- [x] Shared noise presentation (colors/labels/formatting) in `core:ui`
 
-### Phase 4 — History Feature
-### Phase 5 — Analysis Feature
+### Phase 4 — History Feature ✅ DONE
+- [x] Compose history screen in `feature:history`
+- [x] List of all local measurements (dB, category, time, coordinates, note)
+- [x] Empty state and measurement counter
+- [x] Delete single measurement with confirmation + Undo
+- [x] Clear all with confirmation
+- [x] History tab wired into bottom navigation
+
+### Phase 5 — Analysis Feature ← NEXT
+1. Basic statistics (count, average, min, max)
+2. Distribution by noise category
+3. Charts / trends over time
+
 ### Phase 6 — Quiet Route Planning (Later)
 ### Phase 7 — Cloud & Crowdsourcing (Future)
 
@@ -107,7 +120,7 @@ Cloud synchronization and public shared map are **future** goals.
 ## 5. Immediate Next Actions (for any agent)
 
 1. Read this file + `AGENTS.md` + `README.md`
-2. **Next priority: Phase 3 — Map Visualization**
+2. **Next priority: Phase 5 — Analysis Feature**
 3. New code should go into the correct module (`core:data`, `feature:*`)
 4. Prefer Compose for new UI
 5. Update this document after finishing a phase
@@ -121,6 +134,18 @@ Cloud synchronization and public shared map are **future** goals.
 - Yandex MapKit key must stay in `local.properties`
 - `NoiseMeter` lives in `:core:common`
 - Always handle runtime permissions properly
+
+### Noise measurement calibration
+`NoiseMeter` converts PCM RMS to dBFS relative to the 16-bit full scale (32768)
+and then adds `calibrationOffsetDb` (default `90f`) to approximate dB SPL.
+Do **not** add the offset to the raw RMS — that double-counts ~90 dB.
+If readings are still off on a specific device, tune `calibrationOffsetDb`.
+
+### Map zones
+Saved measurements are rendered in `feature/map/.../MeasurementMap.kt` as
+semi-transparent radial-gradient blobs (not point markers). Each zone is scaled
+by zoom to keep a roughly constant geographic size (about 150 m across); nearby
+zones overlap and their colors blend smoothly.
 
 ### How to set Yandex MapKit API key
 In `local.properties` (gitignored):

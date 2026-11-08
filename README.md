@@ -27,29 +27,30 @@ noiseDet2 helps people understand and avoid noise pollution in urban environment
 
 ## Current Status
 
-Early development / MVP in progress.
+Phase 4 complete. Working: noise measurement, local storage, color-coded map markers and measurement history.
 
 ### Already implemented
 - Yandex MapKit integration
 - Current location detection
-- Bottom navigation with three tabs (Map / Database / Analysis)
-- Basic project structure ready for further development
-
-### In active development
+- Bottom navigation with three tabs (Map / History / Analysis)
 - Real-time noise level measurement (dB) using the microphone
 - Local storage of measurements (Room)
-- Color-coded noise markers on the map
-- List of saved measurements
+- Color-coded noise markers on the map with tap details
+- Measurement history with delete / clear all / undo
+- Map and History screens built with Jetpack Compose
+
+### In active development
+- Statistics and charts for saved measurements (Analysis tab)
 
 ---
 
 ## Roadmap
 
 ### Near-term (Local version)
-- [ ] Noise measurement (on-demand / continuous)
-- [ ] Save measurement: coordinates + dB + timestamp
-- [ ] Color-coded markers on the map based on noise level
-- [ ] List of all local measurements
+- [x] Noise measurement (on-demand / continuous)
+- [x] Save measurement: coordinates + dB + timestamp
+- [x] Color-coded markers on the map based on noise level
+- [x] List of all local measurements
 - [ ] Basic statistics (average / max noise level)
 
 ### Mid-term
@@ -72,11 +73,12 @@ Early development / MVP in progress.
 | Component              | Technology                     |
 |------------------------|--------------------------------|
 | Language               | Kotlin                         |
-| UI                     | ViewBinding + Material Design  |
+| UI                     | Jetpack Compose + Material 3   |
 | Maps                   | Yandex MapKit (Lite)           |
-| Architecture           | MVVM                           |
-| Local storage          | Room (planned)                 |
-| Noise measurement      | AudioRecord (planned)          |
+| Architecture           | MVVM + UDF (StateFlow)         |
+| DI                     | Hilt                           |
+| Local storage          | Room                           |
+| Noise measurement      | AudioRecord                    |
 | Min SDK                | 24                             |
 | Target SDK             | 35                             |
 
@@ -87,7 +89,7 @@ Early development / MVP in progress.
 | Tab          | Purpose                                              |
 |--------------|------------------------------------------------------|
 | **Map**      | Interactive map + noise measurement + markers        |
-| **Database** | List of local measurements, filters, deletion        |
+| **History**  | List of local measurements, deletion                 |
 | **Analysis** | Statistics, charts, analysis by time / area          |
 
 ---

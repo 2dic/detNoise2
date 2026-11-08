@@ -23,7 +23,12 @@ import kotlin.math.sqrt
 class NoiseMeter(
     private val sampleRate: Int = 44100,
     private val channelConfig: Int = AudioFormat.CHANNEL_IN_MONO,
-    private val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT
+    private val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT,
+    /**
+     * Offset added to dBFS to approximate dB SPL.
+     * Consumer microphones vary; adjust this value if readings are consistently off.
+     */
+    private val calibrationOffsetDb: Float = 90f
 ) {
 
     private val bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
@@ -72,17 +77,26 @@ class NoiseMeter(
     }
 
     private fun createAudioRecord(): AudioRecord {
-        return AudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            sampleRate,
-            channelConfig,
-            audioFormat,
-            bufferSize
-        ).also {
-            require(it.state == AudioRecord.STATE_INITIALIZED) {
-                "AudioRecord failed to initialize. Check RECORD_AUDIO permission."
+        // UNPROCESSED avoids AGC / noise suppression when the device supports it.
+        // MIC is the fallback for devices that reject the raw source.
+        val sources = intArrayOf(
+            MediaRecorder.AudioSource.UNPROCESSED,
+            MediaRecorder.AudioSource.MIC
+        )
+        sources.forEach { source ->
+            val record = AudioRecord(
+                source,
+                sampleRate,
+                channelConfig,
+                audioFormat,
+                bufferSize
+            )
+            if (record.state == AudioRecord.STATE_INITIALIZED) {
+                return record
             }
+            record.release()
         }
+        error("AudioRecord failed to initialize. Check RECORD_AUDIO permission.")
     }
 
     private fun calculateDb(buffer: ShortArray, readCount: Int): Float {
@@ -95,10 +109,10 @@ class NoiseMeter(
         val rms = sqrt(sumSquares / readCount)
         if (rms < 1.0) return 0f // silence floor
 
-        // Convert RMS to dB. Reference: 32767 = full scale for 16-bit PCM.
-        // Adding offset (~90–100) approximates real-world dB SPL on many devices.
-        // This is relative and should be calibrated for absolute accuracy.
-        val db = (20 * log10(rms)).toFloat() + 90f
+        // 16-bit PCM full scale is 32768, so this is dBFS (always <= 0).
+        // Adding the calibration offset converts it to an approximate dB SPL value.
+        val dbfs = 20 * log10(rms / 32768.0)
+        val db = dbfs.toFloat() + calibrationOffsetDb
         return db.coerceIn(0f, 140f)
     }
 

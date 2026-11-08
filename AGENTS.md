@@ -28,8 +28,8 @@ Android app for measuring and mapping urban noise. Currently local-only storage.
 
 ## Current priority
 
-**Phase 2 completed** (Local storage with Room works).  
-**Next: Phase 3 — Map Visualization** (color-coded placemarks from saved measurements)
+**Phase 4 completed** (Map markers + measurement history).  
+**Next: Phase 5 — Analysis Feature** (statistics, category distribution, charts)
 
 ## Important constraints
 - Storage is local for now
@@ -42,4 +42,8 @@ Android app for measuring and mapping urban noise. Currently local-only storage.
 - `core/common/.../noise/NoiseMeter.kt` — measures dB from microphone
 - `core/data/.../entity/NoiseMeasurementEntity.kt` — Room entity
 - `core/data/.../repository/NoiseRepository.kt` — single source of truth for measurements
-- `ui/home/HomeFragment.kt` — current Map screen (still View-based, will migrate)
+- `core/ui/.../noise/NoiseUi.kt` — shared colors, labels and formatting for noise values
+- `feature/map/.../MapScreen.kt` — Compose map screen (Yandex MapKit via AndroidView)
+- `feature/history/.../HistoryScreen.kt` — Compose list of saved measurements
+- `ui/home/HomeFragment.kt` — hosts the Compose Map screen
+- `ui/history/HistoryFragment.kt` — hosts the Compose History screen

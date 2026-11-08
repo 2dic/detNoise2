@@ -1,9 +1,22 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+}
+
+// `java` inside the Android DSL is the Java extension, so load properties here.
+val mapkitApiKey: String = Properties().run {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+    getProperty("YANDEX_MAPKIT_API_KEY") ?: "YOUR_YANDEX_MAPKIT_API_KEY_HERE"
+}.let { key ->
+    "\"" + key.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 }
 
 android {
@@ -19,16 +32,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Read Yandex MapKit API key from local.properties (not committed to git)
-        val localProperties = java.util.Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            localProperties.load(localPropertiesFile.inputStream())
-        }
-        val mapkitApiKey = localProperties.getProperty("YANDEX_MAPKIT_API_KEY")
-            ?: "YOUR_YANDEX_MAPKIT_API_KEY_HERE"
-
-        buildConfigField("String", "YANDEX_MAPKIT_API_KEY", "\"$mapkitApiKey\"")
+        // Key comes from local.properties (see mapkitApiKey above). Not committed.
+        buildConfigField("String", "YANDEX_MAPKIT_API_KEY", mapkitApiKey)
     }
 
     buildTypes {
